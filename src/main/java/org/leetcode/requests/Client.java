@@ -1,7 +1,5 @@
 package org.leetcode.requests;
 
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -16,7 +14,7 @@ import java.util.Map;
 public class Client {
     public String getResponse(String id) throws ClassNotFoundException, IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
 
-        Class<?> clazz = Class.forName("org.leetcode.queries.Queries");
+        Class<?> clazz = Class.forName("org.leetcode.queries.ProblemsetQuestionListV2");
 
         Field[] field = clazz.getFields();
         Map<Integer, String> map = new HashMap<>();
@@ -42,10 +40,7 @@ public class Client {
                     .build();
 
             HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-            System.out.println(response.statusCode());
-            ObjectMapper objectMapper = new ObjectMapper();
-            Object jsonObject = objectMapper.readValue(response.body(), Object.class);
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+            return response.body();
         }
     }
 }
