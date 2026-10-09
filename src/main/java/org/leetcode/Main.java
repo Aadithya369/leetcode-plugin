@@ -1,24 +1,45 @@
 package org.leetcode;
 
-import org.leetcode.parsers.ProblemList;
+import org.leetcode.parsers.ProblemsetQuestionListV2;
+import org.leetcode.parsers.QuestionDetailResponse;
+import org.leetcode.parsers.QuestionOfToday;
 import org.leetcode.requests.Client;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Scanner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) throws IOException, NoSuchFieldException, InterruptedException, ClassNotFoundException, IllegalAccessException {
-        Client client = new Client();
+  public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException,
+      IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    Client client = new Client();
+    Scanner sc = new Scanner(System.in);
+    String q = sc.nextLine();
+    String params = sc.nextLine();
+    String response = client.getResponse(q, params);
+    // System.out.println(response);
 
-        String respone = client.getResponse(args[0]);
-
-        ObjectMapper mapper = new ObjectMapper();
-        ProblemList problemList = mapper.readValue(respone, ProblemList.class);
-        System.out.println(problemList.getTitle());
-
-
-
+    if (response.isEmpty()) {
+      System.out.println("params are missing");
+      System.exit(0);
     }
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    switch (q) {
+      case "1":
+        ProblemsetQuestionListV2 problemList = objectMapper.readValue(response, ProblemsetQuestionListV2.class);
+        problemList.getData().getProblemsetQuestionListV2().getQuestions()
+            .forEach(x -> System.out.println(x.getId() + ". " + x.getTitle()));
+        break;
+      case "2":
+        QuestionOfToday questionOfToday = objectMapper.readValue(response, QuestionOfToday.class);
+        System.out.println(questionOfToday.getData().getActiveDailyCodingChallengeQuestion().getLink());
+        break;
+      case "3":
+        QuestionDetailResponse questionDetailResponse = objectMapper.readValue(response, QuestionDetailResponse.class);
+        System.out.println(questionDetailResponse.getData().getQuestion().getContent());
+    }
+    sc.close();
+  }
 }
