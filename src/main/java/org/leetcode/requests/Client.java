@@ -18,19 +18,20 @@ public class Client {
       case "1" -> "getProblemsetQuestionListV2";
       case "2" -> "getQuestionOfToday";
       case "3" -> "getQuestionDetail";
+      case "4" -> "getLearningContext";
       default -> throw new IllegalArgumentException(
           "Invalid query ID: " + id);
     };
 
     Method queryMethod;
-    Object result;
+    String result;
 
     if (params != null && !params.isBlank()) {
       queryMethod = clazz.getMethod(methodName, String.class);
-      result = queryMethod.invoke(null, params);
+      result = (String) queryMethod.invoke(null, params);
     } else {
       queryMethod = clazz.getMethod(methodName);
-      result = queryMethod.invoke(null);
+      result = (String) queryMethod.invoke(null);
     }
 
     String requestBody = result.toString();
