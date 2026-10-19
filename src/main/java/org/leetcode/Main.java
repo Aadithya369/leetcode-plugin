@@ -34,11 +34,13 @@ public class Main {
       case "2":
         QuestionOfToday questionOfToday = objectMapper.readValue(response, QuestionOfToday.class);
         String url = questionOfToday.getData().getActiveDailyCodingChallengeQuestion().getLink();
-        new HtmlClient().getHtmlResponse(url);
+        System.out.println(new HtmlClient().getHtmlResponse(url));
         break;
       case "3":
         QuestionDetailResponse questionDetailResponse = objectMapper.readValue(response, QuestionDetailResponse.class);
-        System.out.println(questionDetailResponse.getData().getQuestion().getContent());
+        questionDetailResponse.getData().getQuestion().getCodeSnippets().stream()
+            .filter(x -> x.getLangSlug().equals(args[2]))
+            .forEach(x -> System.out.println(x.getCode()));
         break;
       case "4":
         LearningContextResponse learningContextResponse = objectMapper.readValue(response,

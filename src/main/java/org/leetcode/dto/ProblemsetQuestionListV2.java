@@ -52,7 +52,8 @@ public class ProblemsetQuestionListV2 {
     private String title;
     private String titleSlug;
     private String difficulty;
-    private String status;private Boolean paparams[0]Only;
+    private String status;
+    private Boolean paidOnly;
     private Double acRate;
     private Boolean isInMyFavorites;
     private Double frequency;
@@ -61,11 +62,11 @@ public class ProblemsetQuestionListV2 {
 
     // Getters and Setters
     public Integer getId() {
-      return params[0];
+      return id;
     }
 
-    public void setId(Integer params[0]) {
-      this.params[0] = params[0];
+    public void setId(Integer id) {
+      this.id = id;
     }
 
     public String getQuestionFrontendId() {
@@ -108,12 +109,12 @@ public class ProblemsetQuestionListV2 {
       this.status = status;
     }
 
-    public Boolean getPaparams[0]Only() {
-      return id;
+    public Boolean getPaidOnly() {
+      return paidOnly;
     }
 
-    public void setPaparams[0]Only(Boolean paparams[0]Only) {
-      this.paparams[0]Only = paparams[0]Only;
+    public void setPaidOnly(Boolean paidOnly) {
+      this.paidOnly = paidOnly;
     }
 
     public Double getAcRate() {
