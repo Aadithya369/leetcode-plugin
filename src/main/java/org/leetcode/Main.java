@@ -24,7 +24,7 @@ public class Main {
         break;
       case "3":
         // ProblemDescription
-        response = client.getProblemDescription();
+        response = client.getProblem(args[1]);
         break;
       case "4":
         // NextQuestion
@@ -41,7 +41,7 @@ public class Main {
         response = client.getRandomQuestion();
         break;
       case "8":
-        response = client.getProblem(args[1]);
+        response = client.getFavoriteList(args[1]);
         break;
       default:
         response = "wrong argument";

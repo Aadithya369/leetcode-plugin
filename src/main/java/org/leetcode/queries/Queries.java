@@ -9,10 +9,22 @@ public class Queries {
         skip);
   }
 
-  public static String getSolvedProblems() {
+  // public static String getSolvedProblems() {
+  // return """
+  // {"query":"\\n query problemsetQuestionListCountV2($filters:
+  // QuestionFilterInput, $limit: Int, $searchKeyword: String, $skip: Int,
+  // $sortBy: QuestionSortByInput, $categorySlug: String) {\\n
+  // problemsetQuestionListV2(\\n filters: $filters\\n limit: $limit\\n
+  // searchKeyword: $searchKeyword\\n skip: $skip\\n sortBy: $sortBy\\n
+  // categorySlug: $categorySlug\\n ) {\\n totalLength\\n }\\n}\\n
+  // ","variables":{"filters":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":["SOLVED"],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"frontendIdFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"positionLevelFilter":{"positionLevelSlugs":[],"operator":"IS"},"contestPointFilter":{"contestPoints":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}},"categorySlug":"all-code-essentials","searchKeyword":""},"operationName":"problemsetQuestionListCountV2"}
+  // """;
+  // }
+
+  static public String getSolvedProblems() {
     return """
         {"query":"\\n    query problemsetQuestionListV2($filters: QuestionFilterInput, $limit: Int, $searchKeyword: String, $skip: Int, $sortBy: QuestionSortByInput, $categorySlug: String) {\\n  problemsetQuestionListV2(\\n    filters: $filters\\n    limit: $limit\\n    searchKeyword: $searchKeyword\\n    skip: $skip\\n    sortBy: $sortBy\\n    categorySlug: $categorySlug\\n  ) {\\n    questions {\\n      id\\n      titleSlug\\n      title\\n      translatedTitle\\n      questionFrontendId\\n      paidOnly\\n      difficulty\\n      topicTags {\\n        name\\n        slug\\n        nameTranslated\\n      }\\n      status\\n      isInMyFavorites\\n      frequency\\n      acRate\\n      contestPoint\\n    }\\n    totalLength\\n    finishedLength\\n    hasMore\\n  }\\n}\\n    ","variables":{"skip":0,"limit":100,"categorySlug":"all-code-essentials","filters":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":["SOLVED"],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"frontendIdFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"positionLevelFilter":{"positionLevelSlugs":[],"operator":"IS"},"contestPointFilter":{"contestPoints":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}},"searchKeyword":"","sortBy":{"sortField":"CUSTOM","sortOrder":"ASCENDING"},"filtersV2":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":["SOLVED"],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"frontendIdFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"positionLevelFilter":{"positionLevelSlugs":[],"operator":"IS"},"contestPointFilter":{"contestPoints":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}}},"operationName":"problemsetQuestionListV2"}
-                                        """;
+                """;
   }
 
   public static String getQuestionOfToday(String parasm) {
@@ -58,4 +70,13 @@ public class Queries {
         {"query":"\\n    query randomQuestionV2($favoriteSlug: String, $categorySlug: String, $searchKeyword: String, $filtersV2: QuestionFilterInput) {\\n  randomQuestionV2(\\n    favoriteSlug: $favoriteSlug\\n    categorySlug: $categorySlug\\n    filtersV2: $filtersV2\\n    searchKeyword: $searchKeyword\\n  ) {\\n    titleSlug\\n  }\\n}\\n    ","variables":{"categorySlug":"all-code-essentials","filtersV2":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":[],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"frontendIdFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"positionLevelFilter":{"positionLevelSlugs":[],"operator":"IS"},"contestPointFilter":{"contestPoints":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}},"searchKeyword":""},"operationName":"randomQuestionV2"}
                         """;
   }
+
+  public static String getFavoriteList(String listName) {
+    return String.format(
+        """
+            {"query":"\\n    query favoriteQuestionList($favoriteSlug: String!, $filter: FavoriteQuestionFilterInput, $filtersV2: QuestionFilterInput, $searchKeyword: String, $sortBy: QuestionSortByInput, $limit: Int, $skip: Int, $version: String = \"v2\") {\\n  favoriteQuestionList(\\n    favoriteSlug: $favoriteSlug\\n    filter: $filter\\n    filtersV2: $filtersV2\\n    searchKeyword: $searchKeyword\\n    sortBy: $sortBy\\n    limit: $limit\\n    skip: $skip\\n    version: $version\\n  ) {\\n    questions {\\n      difficulty\\n      id\\n      paidOnly\\n      questionFrontendId\\n      status\\n      title\\n      titleSlug\\n      translatedTitle\\n      isInMyFavorites\\n      frequency\\n      acRate\\n      contestPoint\\n      topicTags {\\n        name\\n        nameTranslated\\n        slug\\n      }\\n    }\\n    totalLength\\n    hasMore\\n  }\\n}\\n    ","variables":{"skip":0,"limit":100,"favoriteSlug":"%s","filtersV2":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":[],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"frontendIdFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"positionLevelFilter":{"positionLevelSlugs":[],"operator":"IS"},"contestPointFilter":{"contestPoints":[],"operator":"IS"},"premiumFilter":{"premiumStatus":[],"operator":"IS"}},"searchKeyword":"","sortBy":{"sortField":"CUSTOM","sortOrder":"ASCENDING"}},"operationName":"favoriteQuestionList"}
+                  """,
+        listName);
+  }
+
 }
