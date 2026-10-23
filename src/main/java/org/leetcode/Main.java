@@ -15,24 +15,19 @@ public class Main {
     String solvedProblemList;
     switch (args[0]) {
       case "1":
-        // ProblemList
         response = client.getProblemList();
         break;
       case "2":
-        // QuestionOfToday
         response = client.getQuestionOfToday();
         break;
       case "3":
-        // ProblemDescription
         response = client.getProblem(args[1]);
         break;
       case "4":
-        // NextQuestion
-        nextQuestion = client.getNextQuesiton();
+        response = client.getNextQuesiton(args[1]);
         break;
       case "5":
-        // Previous Question
-        prevQuestion = client.getPrevQuesiton();
+        response = client.getPrevQuesiton(args[1]);
         break;
       case "6":
         response = client.getSolvedProblemList();

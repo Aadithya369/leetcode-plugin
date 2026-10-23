@@ -12,7 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.leetcode.dto.FavoriteList;
-import org.leetcode.dto.FavoriteList;
+import org.leetcode.dto.LearningContextResponse;
 import org.leetcode.dto.ProblemsetQuestionListV2;
 import org.leetcode.dto.QuestionOfToday;
 import org.leetcode.dto.RandomQuestion;
@@ -39,37 +39,12 @@ public class Client {
           .header("Cookie", System.getenv("LEETCODE_COOKIE"))
           .header("x-csrftoken", System.getenv("LEETCODE_CSRF"))
           .header("Origin", "https://leetcode.com/")
-          .header("Referer", "https://leetcode.com")
-          .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0")
-          .POST(HttpRequest.BodyPublishers.ofString(POSTBody))
-          .build();
-
-      HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-      System.out.println(response);
-      return String.valueOf(response.body());
-    } catch (Exception e) {
-      return String.valueOf(e.getStackTrace());
-    }
-  }
-
-  private String getReponseRefererAsProblemSet(String POSTBody) {
-    try (HttpClient client = HttpClient.newBuilder().build();) {
-
-      HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create("https://leetcode.com/graphql/"))
-          .header("content-type", "application/json")
-          .header("Origin", "https://leetcode.com")
           .header("Referer", "https://leetcode.com/problemset/")
           .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0")
-          .header("x-csrftoken", System.getenv("LEETCODE_CSRF"))
-          .header("Cookie", System.getenv("LEETCODE_COOKIE"))
           .POST(HttpRequest.BodyPublishers.ofString(POSTBody))
           .build();
 
       HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-      System.out.println(System.getenv("LEETCODE_CSRF"));
-      System.out.println(System.getenv("LEETCODE_COOKIE"));
-      System.out.println(response.body());
       return String.valueOf(response.body());
     } catch (Exception e) {
       return String.valueOf(e.getStackTrace());
@@ -96,7 +71,7 @@ public class Client {
         .header("Cookie", System.getenv("LEETCODE_COOKIE"))
         .header("x-csrftoken", System.getenv("LEETCODE_CSRF"))
         .header("Origin", "https://leetcode.com/")
-        .header("Referer", "https://leetcode.com")
+        .header("Referer", "https://leetcode.com/problemset/")
         .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0")
         .get();
     Element meta = doc.selectFirst("meta[name=description]");
@@ -119,7 +94,7 @@ public class Client {
 
   public String getSolvedProblemList() {
     SolvedProblemList solvedProblemList = objectMapper
-        .readValue(getReponseRefererAsProblemSet(Queries.getSolvedProblems()), SolvedProblemList.class);
+        .readValue(getResponse(Queries.getSolvedProblems()), SolvedProblemList.class);
     solvedProblemList.getData().getProblemsetQuestionListV2().getQuestions()
         .forEach(x -> res.append(x.getTitle()).append("\n"));
     return res.toString();
@@ -132,16 +107,24 @@ public class Client {
     return getjsoupResponse(title);
   }
 
-  public Object getPrevQuesiton() {
-    return null;
+  public String getPrevQuesiton(String currentQuestion) throws IOException {
+    LearningContextResponse learningContextResponse = objectMapper
+        .readValue(getResponse(Queries.getLearningContext(currentQuestion)), LearningContextResponse.class);
+    return getjsoupResponse(
+        learningContextResponse.getData().getLearningContextV2().getPreviousQuestion().getTitleSlug());
   }
 
   public String getProblemDescription() {
     return null;
   }
 
-  public Object getNextQuesiton() {
-    return null;
+  public String getNextQuesiton(String currentQuestion) throws IOException {
+    LearningContextResponse learningContextResponse = objectMapper.readValue(
+        getResponse(Queries.getLearningContext(currentQuestion)),
+        LearningContextResponse.class);
+    String res = getjsoupResponse(
+        learningContextResponse.getData().getLearningContextV2().getNextQuestion().getTitleSlug());
+    return res;
   }
 
   public String getQuestionOfToday() throws IOException {
@@ -158,8 +141,8 @@ public class Client {
   public String getFavoriteList(String listName) {
     FavoriteList favouriteList = objectMapper.readValue(getResponse(Queries.getFavoriteList(listName)),
         FavoriteList.class);
-    // favouriteList.getData().getFavoriteQuestionList().getQuestions()
-    // .forEach(x -> res.append(x.getTitle()).append("\n"));
+    favouriteList.getData().getFavoriteQuestionList().getQuestions()
+        .forEach(x -> res.append(x.getTitle()).append("\n"));
     //
     return res.toString();
   }
