@@ -50,7 +50,6 @@ public class Client {
           .build();
 
       HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-      System.out.println(response.body());
       return String.valueOf(response.body());
     } catch (Exception e) {
       return String.valueOf(e.getStackTrace());
@@ -220,8 +219,6 @@ public class Client {
           .replace("\"", "\\\"")
           .replace("\n", "\\n")
           .replace("\r", "\\r");
-
-      System.out.println("ESCAPED CODE: " + escapedCode); // Debug print
 
       return String.valueOf(sendSubmitRequest(titleSlug, Queries.getSubmissionID(lang, id, escapedCode)));
     }
