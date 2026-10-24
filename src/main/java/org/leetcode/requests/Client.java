@@ -1,11 +1,14 @@
 package org.leetcode.requests;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.concurrent.TimeUnit;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,8 +20,10 @@ import org.leetcode.dto.ProblemsetQuestionListV2;
 import org.leetcode.dto.QuestionOfToday;
 import org.leetcode.dto.RandomQuestion;
 import org.leetcode.dto.SolvedProblemList;
+import org.leetcode.dto.SubmissionDetail;
 import org.leetcode.queries.Queries;
 
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -45,6 +50,7 @@ public class Client {
           .build();
 
       HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+      System.out.println(response.body());
       return String.valueOf(response.body());
     } catch (Exception e) {
       return String.valueOf(e.getStackTrace());
@@ -77,6 +83,50 @@ public class Client {
     Element meta = doc.selectFirst("meta[name=description]");
     String content = Parser.unescapeEntities(meta.attr("content"), false);
     return content;
+  }
+
+  private String sendSubmitRequest(String problemTitleSlug, String POSTBody) {
+    try (HttpClient client = HttpClient.newBuilder().build();) {
+
+      HttpRequest request = HttpRequest.newBuilder()
+          .uri(URI.create("https://leetcode.com/" + "problems/" + problemTitleSlug + "/submit/"))
+          .header("content-type", "application/json")
+          .header("Cookie", System.getenv("LEETCODE_COOKIE"))
+          .header("x-csrftoken", System.getenv("LEETCODE_CSRF"))
+          .header("Origin", "https://leetcode.com/")
+          .header("Referer",
+              "https://leetcode.com/problems/" + problemTitleSlug)
+          .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0")
+          .POST(HttpRequest.BodyPublishers.ofString(POSTBody))
+          .build();
+
+      HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+      JsonNode jsonNode = new ObjectMapper().readTree(response.body());
+      return jsonNode.get("submission_id").toString();
+    } catch (Exception e) {
+      return String.valueOf(e.getStackTrace());
+    }
+  }
+
+  public String getSubmissionInformation(String submissionId, String problemTitleSlug)
+      throws IOException, InterruptedException {
+    try (HttpClient client = HttpClient.newBuilder().build()) {
+
+      HttpRequest request = HttpRequest.newBuilder()
+          .uri(URI.create("https://leetcode.com/submissions/detail/" + submissionId + "/v2/check/"))
+          .header("content-type", "application/json")
+          .header("Cookie", System.getenv("LEETCODE_COOKIE"))
+          .header("x-csrftoken", System.getenv("LEETCODE_CSRF"))
+          .header("Origin", "https://leetcode.com/")
+          .header("Referer",
+              "https://leetcode.com/problems/" + problemTitleSlug + "submissions/" + submissionId + "/")
+          .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:160.0) Gecko/20100101 Firefox/160.0")
+          .build();
+      TimeUnit.SECONDS.sleep(2);
+
+      HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+      return response.body();
+    }
   }
 
   public String getProblemList() {
@@ -145,5 +195,35 @@ public class Client {
         .forEach(x -> res.append(x.getTitle()).append("\n"));
     //
     return res.toString();
+  }
+
+  public String submitCode(String lang, String id, String titleSlug) throws IOException, InterruptedException {
+    String submissionId = getSubmissionId(lang, id, titleSlug);
+    String result = getSubmissionInformation(submissionId, titleSlug);
+    ObjectMapper objectMapper = new ObjectMapper();
+    SubmissionDetail submissionDetail = objectMapper.readValue(result, SubmissionDetail.class);
+    return submissionDetail.getStatus_msg();
+
+  }
+
+  public String getSubmissionId(String lang, String id, String titleSlug) throws IOException {
+    try (BufferedReader br = new BufferedReader(new FileReader("/tmp/code.java"))) {
+      StringBuilder sb = new StringBuilder();
+      String line;
+      while ((line = br.readLine()) != null) {
+        sb.append(line).append(System.lineSeparator());
+      }
+
+      // Escape backslashes, quotes, and newlines so it forms valid JSON
+      String escapedCode = sb.toString()
+          .replace("\\", "\\\\")
+          .replace("\"", "\\\"")
+          .replace("\n", "\\n")
+          .replace("\r", "\\r");
+
+      System.out.println("ESCAPED CODE: " + escapedCode); // Debug print
+
+      return String.valueOf(sendSubmitRequest(titleSlug, Queries.getSubmissionID(lang, id, escapedCode)));
+    }
   }
 }

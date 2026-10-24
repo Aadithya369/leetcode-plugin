@@ -10,9 +10,6 @@ public class Main {
       IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     Client client = new Client();
     String response = "";
-    Object nextQuestion;
-    Object prevQuestion;
-    String solvedProblemList;
     switch (args[0]) {
       case "1":
         response = client.getProblemList();
@@ -37,6 +34,9 @@ public class Main {
         break;
       case "8":
         response = client.getFavoriteList(args[1]);
+        break;
+      case "9":
+        response = client.submitCode(args[1], args[2], args[3]);
         break;
       default:
         response = "wrong argument";
