@@ -17,9 +17,6 @@ public class QuestionDetailResponse {
     this.data = data;
   }
 
-  // ==========================================
-  // ROOT DATA CONTAINER
-  // ==========================================
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class DataDto {
     private List<Language> languageList;
@@ -79,9 +76,6 @@ public class QuestionDetailResponse {
     }
   }
 
-  // ==========================================
-  // SUPPORTING METADATA CLASSES
-  // ==========================================
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Language {
     private int id;
@@ -109,6 +103,7 @@ public class QuestionDetailResponse {
     private int id;
     private String name;
     private String verboseName;
+    @JsonProperty("isCompiledLang")
     private boolean isCompiledLang;
 
     public int getId() {
@@ -135,12 +130,12 @@ public class QuestionDetailResponse {
       this.verboseName = verboseName;
     }
 
-    public boolean isIsCompiledLang() {
+    public boolean isCompiledLang() {
       return isCompiledLang;
     }
 
-    public void setIsCompiledLang(boolean isCompiledLang) {
-      this.isCompiledLang = isCompiledLang;
+    public void setCompiledLang(boolean compiledLang) {
+      isCompiledLang = compiledLang;
     }
   }
 
@@ -201,7 +196,9 @@ public class QuestionDetailResponse {
   public static class UgcArticleOfficialSolutionArticle {
     private String uuid;
     private String chargeType;
+    @JsonProperty("canSee")
     private boolean canSee;
+    @JsonProperty("hasVideoArticle")
     private boolean hasVideoArticle;
 
     public String getUuid() {
@@ -237,9 +234,6 @@ public class QuestionDetailResponse {
     }
   }
 
-  // ==========================================
-  // MAIN QUESTION DETAIL CLASS
-  // ==========================================
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class QuestionDetail {
     private String title;
@@ -265,22 +259,29 @@ public class QuestionDetailResponse {
     @JsonProperty("isPaidOnly")
     private boolean isPaidOnly;
     private String status;
+    @JsonProperty("canSeeQuestion")
     private boolean canSeeQuestion;
+    @JsonProperty("enableTestMode")
     private boolean enableTestMode;
     private String metaData;
+    @JsonProperty("enableRunCode")
     private boolean enableRunCode;
+    @JsonProperty("enableSubmit")
     private boolean enableSubmit;
+    @JsonProperty("enableDebugger")
     private boolean enableDebugger;
     private String envInfo;
-    private Boolean isLiked;
+    private Boolean isLiked; // Wrapper Boolean handles incoming `null` safely
     private List<NextChallenge> nextChallenges;
     private String libraryUrl;
     private String adminUrl;
     private List<String> hints;
     private List<CodeSnippet> codeSnippets;
     private List<String> exampleTestcaseList;
+    @JsonProperty("hasFrontendPreview")
     private boolean hasFrontendPreview;
     private List<FeaturedContest> featuredContests;
+    @JsonProperty("aiJudgingAvailable")
     private boolean aiJudgingAvailable;
 
     public String getTitle() {
@@ -596,9 +597,6 @@ public class QuestionDetailResponse {
     }
   }
 
-  // ==========================================
-  // QUESTION INNER SUB-CLASSES
-  // ==========================================
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class TopicTag {
     private String name;
@@ -667,8 +665,8 @@ public class QuestionDetailResponse {
     private String titleSlug;
     private String title;
     private String translatedTitle;
-    @JsonProperty("isPaidOnly")
     private boolean isPaidOnly;
+    private boolean paidOnly;
 
     public String getDifficulty() {
       return difficulty;
@@ -707,7 +705,7 @@ public class QuestionDetailResponse {
     }
 
     public void setPaidOnly(boolean paidOnly) {
-      isPaidOnly = paidOnly;
+      this.paidOnly = paidOnly;
     }
   }
 

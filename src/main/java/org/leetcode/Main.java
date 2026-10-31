@@ -36,11 +36,20 @@ public class Main {
         response = client.getFavoriteList(args[1]);
         break;
       case "9":
-        response = client.submitCode(args[1], args[2], args[3]);
+        response = client.submitCode(args[1], args[2], args[3], args[4]);
+        break;
+      case "10":
+        response = client.getCodeSnippets(args[1], args[2]);
+        break;
+      case "11":
+        response = client.getExampleTestCases(args[1]);
+        break;
+      case "12":
+        response = client.getListOfLanguages(args[1]);
         break;
       default:
         response = "wrong argument";
     }
-    System.out.println(response);
+    IO.println(response);
   }
 }

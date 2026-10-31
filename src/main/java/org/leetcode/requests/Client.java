@@ -17,6 +17,7 @@ import org.jsoup.parser.Parser;
 import org.leetcode.dto.FavoriteList;
 import org.leetcode.dto.LearningContextResponse;
 import org.leetcode.dto.ProblemsetQuestionListV2;
+import org.leetcode.dto.QuestionDetailResponse;
 import org.leetcode.dto.QuestionOfToday;
 import org.leetcode.dto.RandomQuestion;
 import org.leetcode.dto.SolvedProblemList;
@@ -50,6 +51,7 @@ public class Client {
           .build();
 
       HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+      // System.out.println(response.body());
       return String.valueOf(response.body());
     } catch (Exception e) {
       return String.valueOf(e.getStackTrace());
@@ -135,7 +137,7 @@ public class Client {
           .readValue(getResponse(Queries.getProblemsetQuestionListV2(i * 100)), ProblemsetQuestionListV2.class);
 
       problemsetQuestionListV2.getData().getProblemsetQuestionListV2().getQuestions().stream()
-          .forEach(x -> res.append(x.getTitle()).append("\n"));
+          .forEach(x -> res.append(x.getId() + ".").append(x.getTitle()).append("\n"));
     }
 
     return res.toString();
@@ -152,35 +154,27 @@ public class Client {
   public String getRandomQuestion() throws IOException {
     RandomQuestion randomQuestion = objectMapper.readValue(getResponse(Queries.getRandomQuesiton()),
         RandomQuestion.class);
-    String title = randomQuestion.getData().getRandomQuestionV2().getTitleSlug();
-    return getjsoupResponse(title);
+    return randomQuestion.getData().getRandomQuestionV2().getTitleSlug();
   }
 
   public String getPrevQuesiton(String currentQuestion) throws IOException {
     LearningContextResponse learningContextResponse = objectMapper
         .readValue(getResponse(Queries.getLearningContext(currentQuestion)), LearningContextResponse.class);
-    return getjsoupResponse(
-        learningContextResponse.getData().getLearningContextV2().getPreviousQuestion().getTitleSlug());
-  }
-
-  public String getProblemDescription() {
-    return null;
+    return learningContextResponse.getData().getLearningContextV2().getPreviousQuestion().getTitleSlug();
   }
 
   public String getNextQuesiton(String currentQuestion) throws IOException {
     LearningContextResponse learningContextResponse = objectMapper.readValue(
         getResponse(Queries.getLearningContext(currentQuestion)),
         LearningContextResponse.class);
-    String res = getjsoupResponse(
-        learningContextResponse.getData().getLearningContextV2().getNextQuestion().getTitleSlug());
-    return res;
+    return learningContextResponse.getData().getLearningContextV2().getNextQuestion().getTitleSlug();
   }
 
   public String getQuestionOfToday() throws IOException {
     QuestionOfToday questionOfToday = objectMapper.readValue(getResponse(Queries.getQuestionOfToday()),
         QuestionOfToday.class);
     String url = questionOfToday.getData().getActiveDailyCodingChallengeQuestion().getLink();
-    return getjsoupResponseForAURL(url);
+    return url.split("/")[2];
   }
 
   public String getProblem(String title) throws IOException {
@@ -196,8 +190,9 @@ public class Client {
     return res.toString();
   }
 
-  public String submitCode(String lang, String id, String titleSlug) throws IOException, InterruptedException {
-    String submissionId = getSubmissionId(lang, id, titleSlug);
+  public String submitCode(String lang, String id, String titleSlug, String fileName)
+      throws IOException, InterruptedException {
+    String submissionId = getSubmissionId(lang, id, titleSlug, fileName);
     String result = getSubmissionInformation(submissionId, titleSlug);
     ObjectMapper objectMapper = new ObjectMapper();
     SubmissionDetail submissionDetail = objectMapper.readValue(result, SubmissionDetail.class);
@@ -205,8 +200,8 @@ public class Client {
 
   }
 
-  public String getSubmissionId(String lang, String id, String titleSlug) throws IOException {
-    try (BufferedReader br = new BufferedReader(new FileReader("/tmp/code.java"))) {
+  public String getSubmissionId(String lang, String id, String titleSlug, String fileName) throws IOException {
+    try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
       StringBuilder sb = new StringBuilder();
       String line;
       while ((line = br.readLine()) != null) {
@@ -218,9 +213,38 @@ public class Client {
           .replace("\\", "\\\\")
           .replace("\"", "\\\"")
           .replace("\n", "\\n")
+          .replace("\t", "\\t")
           .replace("\r", "\\r");
 
       return String.valueOf(sendSubmitRequest(titleSlug, Queries.getSubmissionID(lang, id, escapedCode)));
     }
+  }
+
+  public String getCodeSnippets(String titleSlug, String langSlug) {
+    QuestionDetailResponse questionDetailResponse = objectMapper
+        .readValue(getResponse(Queries.getQuestionDetail(titleSlug)), QuestionDetailResponse.class);
+
+    questionDetailResponse.getData().getQuestion().getCodeSnippets().stream()
+        .filter(x -> x.getLangSlug().equals(langSlug)).forEach(x -> res.append(x.getCode()));
+
+    return res.toString();
+  }
+
+  public String getExampleTestCases(String titleSlug) {
+    QuestionDetailResponse questionDetailResponse = objectMapper
+        .readValue(getResponse(Queries.getQuestionDetail(titleSlug)), QuestionDetailResponse.class);
+
+    questionDetailResponse.getData().getQuestion().getExampleTestcaseList().stream().forEach(x -> res.append(x));
+
+    return res.toString();
+  }
+
+  public String getListOfLanguages(String titleSlug) {
+    QuestionDetailResponse questionDetailResponse = objectMapper
+        .readValue(getResponse(Queries.getQuestionDetail(titleSlug)), QuestionDetailResponse.class);
+
+    questionDetailResponse.getData().getLanguageList().stream().forEach(x -> res.append(x.getName()).append("\n"));
+
+    return res.toString();
   }
 }
